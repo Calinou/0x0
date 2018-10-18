@@ -1,0 +1,6 @@
+#!/usr/bin/env bash
+
+set -euo pipefail
+IFS=$'\n\t'
+
+curl -F"file=@$1" https://0x0.st
