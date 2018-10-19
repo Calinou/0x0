@@ -23,8 +23,16 @@
 set -euo pipefail
 IFS=$'\n\t'
 
-STYLE_ERROR="\\e[1;31m"
-STYLE_RESET="\\e[0m"
+if [[ -t 1 ]]; then
+  # stdout is a TTY, enable colors
+  STYLE_ERROR="\\e[1;31m"
+  STYLE_RESET="\\e[0m"
+else
+  # stdout is not a TTY, disable colors
+  STYLE_ERROR=""
+  STYLE_RESET=""
+fi
+
 ERROR_HEADER="${STYLE_ERROR}Error:${STYLE_RESET}"
 
 if [[ ! "${1:+empty}" ]]; then
