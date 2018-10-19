@@ -45,7 +45,8 @@ if [[ -d "$1" ]]; then
   exit 0
 fi
 
-if [[ ! -f "$1" ]]; then
+if [[ ! -f "$1" && "$1" != "-" ]]; then
+  # "-" can be used as argument to upload from standard input
   echo -e "$ERROR_HEADER \"$1\": no such file"
   exit 0
 fi
