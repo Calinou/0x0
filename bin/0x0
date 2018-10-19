@@ -3,4 +3,23 @@
 set -euo pipefail
 IFS=$'\n\t'
 
+STYLE_ERROR="\\e[1;31m"
+STYLE_RESET="\\e[0m"
+ERROR_HEADER="${STYLE_ERROR}Error:${STYLE_RESET}"
+
+if [[ ! "${1:+empty}" ]]; then
+  echo "Usage: $(basename "$0") <file>"
+  exit 1
+fi
+
+if [[ -d "$1" ]]; then
+  echo -e "$ERROR_HEADER \"$1\" is a directory"
+  exit 0
+fi
+
+if [[ ! -f "$1" ]]; then
+  echo -e "$ERROR_HEADER \"$1\": no such file"
+  exit 0
+fi
+
 curl -F"file=@$1" https://0x0.st
