@@ -1,17 +1,17 @@
 #!/usr/bin/env bash
 #
 # Copyright © 2018 Hugo Locurcio and contributors
-# 
+#
 # Permission is hereby granted, free of charge, to any person obtaining a copy
 # of this software and associated documentation files (the "Software"), to deal
 # in the Software without restriction, including without limitation the rights
 # to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
 # copies of the Software, and to permit persons to whom the Software is
 # furnished to do so, subject to the following conditions:
-# 
+#
 # The above copyright notice and this permission notice shall be included in all
 # copies or substantial portions of the Software.
-# 
+#
 # THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
 # IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
 # FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
@@ -22,6 +22,15 @@
 
 set -euo pipefail
 IFS=$'\n\t'
+
+# Returns 0 (true) if argument begins with http:// or https://
+is_url() {
+  if [[ "${1#http://}" != "$1" || "${1#https://}" != "$1" ]]; then
+    return 0
+  fi
+
+  return 1
+}
 
 if [[ -t 1 ]]; then
   # stdout is a TTY, enable colors
@@ -36,19 +45,25 @@ fi
 ERROR_HEADER="${STYLE_ERROR}Error:${STYLE_RESET}"
 
 if [[ ! "${1:+empty}" ]]; then
-  echo "Usage: $(basename "$0") <file>"
+  echo "Usage: $(basename "$0") <file|URL>"
   exit 1
 fi
 
 if [[ -d "$1" ]]; then
   echo -e "$ERROR_HEADER \"$1\" is a directory"
-  exit 0
+  exit 1
 fi
 
-if [[ ! -f "$1" && "$1" != "-" ]]; then
+if ! is_url "$1" && [[ ! -f "$1" && "$1" != "-" ]]; then
   # "-" can be used as argument to upload from standard input
   echo -e "$ERROR_HEADER \"$1\": no such file"
-  exit 0
+  exit 1
 fi
 
-curl -F"file=@$1" https://0x0.st
+if is_url "$1"; then
+  # Upload from URL
+  curl -F "url=$1" https://0x0.st
+else
+  # Upload from file
+  curl -F "file=@$1" https://0x0.st
+fi
