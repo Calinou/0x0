@@ -34,18 +34,31 @@ is_url() {
 
 if [[ -t 1 ]]; then
   # stdout is a TTY, enable colors
+  STYLE_COMMAND="\\e[0;97m"
+  STYLE_ARG="\\e[0;96m"
   STYLE_ERROR="\\e[1;31m"
+  STYLE_BOLD="\\e[1m"
   STYLE_RESET="\\e[0m"
 else
   # stdout is not a TTY, disable colors
+  STYLE_COMMAND=""
+  STYLE_ARG=""
   STYLE_ERROR=""
+  STYLE_BOLD=""
   STYLE_RESET=""
 fi
 
 ERROR_HEADER="${STYLE_ERROR}Error:${STYLE_RESET}"
 
 if [[ ! "${1:+empty}" ]]; then
-  echo "Usage: $(basename "$0") <file|URL>"
+	echo -e "${STYLE_BOLD}0x0, a wrapper script for https://0x0.st/${STYLE_RESET}\n"
+  echo -e "  Upload a file:"
+  echo -e "      ${STYLE_COMMAND}$(basename "$0") ${STYLE_ARG}<file>${STYLE_RESET}\n"
+  echo -e "  Upload from an URL (the file won't be fetched locally):"
+  echo -e "      ${STYLE_COMMAND}$(basename "$0") ${STYLE_ARG}<url>${STYLE_RESET}\n"
+  echo -e "  Upload from standard input:"
+  echo -e "      ${STYLE_COMMAND}$(basename "$0") ${STYLE_ARG}-${STYLE_RESET}\n"
+  echo -e "The uploaded file's URL is printed to standard output when the upload is completed."
   exit 1
 fi
 
