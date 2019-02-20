@@ -59,7 +59,13 @@ if [[ ! "${1:+empty}" || "$1" == "--help" || "$1" == "-h" ]]; then
   echo -e "  Upload from standard input:"
   echo -e "      ${STYLE_COMMAND}$(basename "$0") ${STYLE_ARG}-${STYLE_RESET}\n"
   echo -e "The uploaded file's URL is printed to standard output when the upload is completed."
-  exit 1
+
+  # Exit with code 0 only if help was explicitly requested
+  if [[ "$1" == "--help" || "$1" == "-h" ]]; then
+    exit 0
+  else
+    exit 1
+  fi
 fi
 
 if [[ -d "$1" ]]; then
