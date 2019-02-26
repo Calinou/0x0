@@ -1,9 +1,9 @@
 language: generic
 
-install: |
-  pyenv global 3.6.3
-  pip3 install --user pre-commit
+install:
+  - pyenv global 3.6.3
+  - pip3 install --user pre-commit
 
-script: |
-  "$HOME/.local/bin/pre-commit" run --all-files
-  shellcheck --color bin/0x0
+script:
+  - $HOME/.local/bin/pre-commit run --all-files
+  - shellcheck --color bin/0x0
