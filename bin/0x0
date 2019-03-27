@@ -48,8 +48,6 @@ else
   STYLE_RESET=""
 fi
 
-ERROR_HEADER="${STYLE_ERROR}Error:${STYLE_RESET}"
-
 if [[ ! "${1:-}" || "${1:-}" == "--help" || "${1:-}" == "-h" ]]; then
 	echo -e "${STYLE_BOLD}0x0, a wrapper script for https://0x0.st/${STYLE_RESET}\n"
   echo -e "  Upload a file:"
@@ -68,14 +66,16 @@ if [[ ! "${1:-}" || "${1:-}" == "--help" || "${1:-}" == "-h" ]]; then
   fi
 fi
 
+ERROR_HEADER="${STYLE_ERROR}Error:${STYLE_RESET}"
+
 if [[ -d "$1" ]]; then
-  echo -e "$ERROR_HEADER \"$1\" is a directory"
+  echo -e "$ERROR_HEADER \"$1\" is a directory."
   exit 1
 fi
 
 if ! is_url "$1" && [[ ! -f "$1" && "$1" != "-" ]]; then
   # "-" can be used as argument to upload from standard input
-  echo -e "$ERROR_HEADER \"$1\": no such file"
+  echo -e "$ERROR_HEADER \"$1\": no such file."
   exit 1
 fi
 
