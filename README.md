@@ -34,8 +34,13 @@ sudo mv 0x0 /usr/local/bin
 # Upload a local file
 0x0 some_file.png
 
-# Upload an URL's contents (starting with `http://` or `https://`)
+# Upload from an URL (the file won't be fetched locally).
+# The URL must start with `http://` or `https://`.
 0x0 http://example.com
+
+# Upload from standard input.
+# Example usage with a pipe: `tail some_file | 0x0 -`
+0x0 -
 ```
 
 If the upload is successful, the file URL will be printed to standard output.
