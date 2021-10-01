@@ -55,23 +55,29 @@ print_error() {
   echo -e "${STYLE_ERROR}${STYLE_BOLD}Error:${STYLE_NORMAL} $1${STYLE_RESET}"
 }
 
-if [[ ! "${1:-}" || "${1:-}" == "--help" || "${1:-}" == "-h" ]]; then
+print_help() {
+  base="${0##*/}"
 	echo -e "${STYLE_BOLD}0x0, a wrapper script for https://0x0.st/${STYLE_RESET}\n"
   echo -e "  Upload a file:"
-  echo -e "      ${STYLE_COMMAND}$(basename "$0") ${STYLE_ARG}<file>${STYLE_RESET}\n"
+  echo -e "      ${STYLE_COMMAND}${base} ${STYLE_ARG}<file>${STYLE_RESET}\n"
   echo -e "  Upload from an URL (the file won't be fetched locally):"
-  echo -e "      ${STYLE_COMMAND}$(basename "$0") ${STYLE_ARG}<url>${STYLE_RESET}\n"
+  echo -e "      ${STYLE_COMMAND}${base} ${STYLE_ARG}<url>${STYLE_RESET}\n"
   echo -e "  Upload from standard input:"
-  echo -e "      ${STYLE_COMMAND}$(basename "$0") ${STYLE_ARG}-${STYLE_RESET}\n"
+  echo -e "      ${STYLE_COMMAND}${base} ${STYLE_ARG}-${STYLE_RESET}\n"
   echo -e "The uploaded file's URL is printed to standard output when the upload is completed."
+}
 
+case "${1:-}" in
   # Exit with code 0 only if help was explicitly requested
-  if [[ "${1:-}" == "--help" || "${1:-}" == "-h" ]]; then
+  -h|--help)
+    print_help
     exit 0
-  else
+    ;;
+  '')
+    print_help
     exit 1
-  fi
-fi
+    ;;
+esac
 
 if [[ -d "$1" ]]; then
   print_error "\"$1\" is a directory."
