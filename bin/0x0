@@ -41,9 +41,10 @@ else
   STYLE_RESET=""
 fi
 
-# Prints an error message to standard output.
+# Prints an error message to stderr
 print_error() {
-  echo -e "${STYLE_ERROR}${STYLE_BOLD}Error:${STYLE_NORMAL} $1${STYLE_RESET}"
+  echo -e "${STYLE_ERROR}${STYLE_BOLD}Error:${STYLE_NORMAL} $1${STYLE_RESET}" >&2
+  exit 1
 }
 
 print_help() {
@@ -80,9 +81,7 @@ elif [[ "$1" =~ ^https?://.* ]]; then
 
 elif [[ -d "$1" ]]; then
   print_error "\"$1\" is a directory."
-  exit 1
 
 else
   print_error "\"$1\": no such file."
-  exit 1
 fi
