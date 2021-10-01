@@ -41,15 +41,6 @@ else
   STYLE_RESET=""
 fi
 
-# Returns 0 (true) if argument begins with `http://` or `https://`.
-is_url() {
-  if [[ "${1#http://}" != "$1" || "${1#https://}" != "$1" ]]; then
-    return 0
-  fi
-
-  return 1
-}
-
 # Prints an error message to standard output.
 print_error() {
   echo -e "${STYLE_ERROR}${STYLE_BOLD}Error:${STYLE_NORMAL} $1${STYLE_RESET}"
@@ -79,21 +70,19 @@ case "${1:-}" in
     ;;
 esac
 
-if [[ -d "$1" ]]; then
-  print_error "\"$1\" is a directory."
-  exit 1
-fi
+if [[ -f "$1" || "$1" = '-' ]]; then
+  # Upload from file or stdin
+  curl -F "file=@$1" https://0x0.st
 
-if ! is_url "$1" && [[ ! -f "$1" && "$1" != "-" ]]; then
-  # "-" can be used as argument to upload from standard input
-  print_error "\"$1\": no such file."
-  exit 1
-fi
-
-if is_url "$1"; then
+elif [[ "$1" =~ ^https?://.* ]]; then
   # Upload from URL
   curl -F "url=$1" https://0x0.st
+
+elif [[ -d "$1" ]]; then
+  print_error "\"$1\" is a directory."
+  exit 1
+
 else
-  # Upload from file
-  curl -F "file=@$1" https://0x0.st
+  print_error "\"$1\": no such file."
+  exit 1
 fi
