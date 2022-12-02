@@ -26,6 +26,8 @@ IFS=$'\n\t'
 API_ENDPOINT=https://0x0.st/
 EXPIRES=0
 INPUT_ARG=""
+MIMETYPE=""
+VERBOSE=false
 
 if [[ -t 1 ]]; then
   # stdout is a TTY, enable colors
@@ -58,7 +60,11 @@ print_help() {
   echo -e "Options:"
   echo -e "  -e | --expires ${STYLE_ARG}<number>${STYLE_RESET}  Set an expiration on the file"
   echo -e "                           'number' is the number of hours from now or"
-  echo -e "                           a timestamp in epoch milliseconds.\n"
+  echo -e "                           a timestamp in epoch milliseconds."
+  echo -e "  -m | --mimetype ${STYLE_ARG}<type>${STYLE_RESET}   Force a mime-type to the uploaded content"
+  echo -e "                           example: -m text/plain"
+  echo -e "  -v | --verbose           Also return relevant headers from response"
+  echo -e "                           Outputs x-expires and x-token headers if present"
   echo -e "Examples:"
   echo -e "  Upload a file:"
   echo -e "      ${STYLE_COMMAND}${base} ${STYLE_ARG}<file>${STYLE_RESET}\n"
@@ -89,6 +95,15 @@ while [[ $# -gt 0 ]]; do
       print_help
       exit 0
       ;;
+    "-m"|"--mimetype")
+      if [[ $# -eq 0 ]] || [[ "$1" =~ ^-{1,2}.* ]]; then
+        print_error "Missing or invalid argument for mimetype option"
+      fi
+      MIMETYPE="$1"
+      ;;
+    "-v"|"--verbose")
+      VERBOSE=true
+      ;;
     *)
       INPUT_ARG="$opt"
       ;;
@@ -105,6 +120,12 @@ fi
 # Construct an array of opts for the curl command
 curl_opts=( "$API_ENDPOINT" )
 
+# Add support for verbose logic to curl command
+if [[ $VERBOSE == true ]]; then
+  tmp_file=$(mktemp)
+  curl_opts=( --no-progress-meter --dump-header "$tmp_file" "${curl_opts[@]}")
+fi
+
 # Add expires to curl opts
 if [[ $EXPIRES -gt 0 ]]; then
   curl_opts=( -F expires="$EXPIRES" "${curl_opts[@]}" )
@@ -113,6 +134,9 @@ fi
 # Make appropriate curl opts from input
 if [[ -f "$INPUT_ARG" || "$INPUT_ARG" = '-' ]]; then
   # Upload from file or stdin
+  if [[ $MIMETYPE != "" ]]; then
+    INPUT_ARG="$INPUT_ARG;type=$MIMETYPE"
+  fi
   curl_opts=( -F file=@"$INPUT_ARG" "${curl_opts[@]}" )
 
 elif [[ "$INPUT_ARG" =~ ^https?://.* ]]; then
@@ -127,3 +151,11 @@ else
 fi
 
 curl "${curl_opts[@]}"
+
+if [[ $VERBOSE == true ]]; then
+  echo -n -e "${STYLE_ARG}"
+  < "$tmp_file" grep -e x-expires -e x-token | cat
+  echo -n -e "${STYLE_RESET}"
+
+  rm -f "$tmp_file"
+fi
