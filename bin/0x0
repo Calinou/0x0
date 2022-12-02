@@ -23,6 +23,8 @@
 set -euo pipefail
 IFS=$'\n\t'
 
+API_ENDPOINT=https://0x0.st/
+
 if [[ -t 1 ]]; then
   # stdout is a TTY, enable colors
   STYLE_COMMAND="\033[0;97m"
@@ -49,7 +51,7 @@ print_error() {
 
 print_help() {
   base="${0##*/}"
-  echo -e "${STYLE_BOLD}0x0, a wrapper script for https://0x0.st/${STYLE_RESET}\n"
+  echo -e "${STYLE_BOLD}0x0, a wrapper script for ${API_ENDPOINT}${STYLE_RESET}\n"
   echo -e "  Upload a file:"
   echo -e "      ${STYLE_COMMAND}${base} ${STYLE_ARG}<file>${STYLE_RESET}\n"
   echo -e "  Upload from an URL (the file won't be fetched locally):"
@@ -73,11 +75,11 @@ esac
 
 if [[ -f "$1" || "$1" = '-' ]]; then
   # Upload from file or stdin
-  curl -F "file=@$1" https://0x0.st
+  curl -F "file=@$1" "$API_ENDPOINT"
 
 elif [[ "$1" =~ ^https?://.* ]]; then
   # Upload from URL
-  curl -F "url=$1" https://0x0.st
+  curl -F "url=$1" "$API_ENDPOINT"
 
 elif [[ -d "$1" ]]; then
   print_error "\"$1\" is a directory."
