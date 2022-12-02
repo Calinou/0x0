@@ -24,6 +24,8 @@ set -euo pipefail
 IFS=$'\n\t'
 
 API_ENDPOINT=https://0x0.st/
+EXPIRES=0
+INPUT_ARG=""
 
 if [[ -t 1 ]]; then
   # stdout is a TTY, enable colors
@@ -52,6 +54,12 @@ print_error() {
 print_help() {
   base="${0##*/}"
   echo -e "${STYLE_BOLD}0x0, a wrapper script for ${API_ENDPOINT}${STYLE_RESET}\n"
+  echo -e "Usage: ${base} [options] <file|url>\n"
+  echo -e "Options:"
+  echo -e "  -e | --expires ${STYLE_ARG}<number>${STYLE_RESET}  Set an expiration on the file"
+  echo -e "                           'number' is the number of hours from now or"
+  echo -e "                           a timestamp in epoch milliseconds.\n"
+  echo -e "Examples:"
   echo -e "  Upload a file:"
   echo -e "      ${STYLE_COMMAND}${base} ${STYLE_ARG}<file>${STYLE_RESET}\n"
   echo -e "  Upload from an URL (the file won't be fetched locally):"
@@ -61,29 +69,61 @@ print_help() {
   echo -e "The uploaded file's URL is printed to standard output when the upload is completed."
 }
 
-case "${1:-}" in
-  # Exit with code 0 only if help was explicitly requested
-  -h|--help)
-    print_help
-    exit 0
-    ;;
-  '')
-    print_help
-    exit 1
-    ;;
-esac
+# Process options and arguments
+while [[ $# -gt 0 ]]; do
+  opt="$1"
+  shift;
+  case "$opt" in
+    "-e"|"--expires")
+      if [[ $# -eq 0 ]] || [[ "$1" =~ ^-{1,2}.* ]]; then
+        print_error "Missing or invalid argument for expires option"
+      fi
+      EXPIRES="$1"
+      is_number='^[0-9]+$'
+      if ! [[ $EXPIRES =~ $is_number ]] ; then
+        print_error "Expires value must be a number"
+      fi
+      shift
+      ;;
+    "-h"|"--help")
+      print_help
+      exit 0
+      ;;
+    *)
+      INPUT_ARG="$opt"
+      ;;
+  esac
+done
 
-if [[ -f "$1" || "$1" = '-' ]]; then
+# Did we get an input argument?
+if [[ "$INPUT_ARG" == "" ]]; then
+  # No input argument
+  print_help
+  exit 1
+fi
+
+# Construct an array of opts for the curl command
+curl_opts=( "$API_ENDPOINT" )
+
+# Add expires to curl opts
+if [[ $EXPIRES -gt 0 ]]; then
+  curl_opts=( -F expires="$EXPIRES" "${curl_opts[@]}" )
+fi
+
+# Make appropriate curl opts from input
+if [[ -f "$INPUT_ARG" || "$INPUT_ARG" = '-' ]]; then
   # Upload from file or stdin
-  curl -F "file=@$1" "$API_ENDPOINT"
+  curl_opts=( -F file=@"$INPUT_ARG" "${curl_opts[@]}" )
 
-elif [[ "$1" =~ ^https?://.* ]]; then
+elif [[ "$INPUT_ARG" =~ ^https?://.* ]]; then
   # Upload from URL
-  curl -F "url=$1" "$API_ENDPOINT"
+  curl_opts=( -F url="$INPUT_ARG" "${curl_opts[@]}" )
 
-elif [[ -d "$1" ]]; then
-  print_error "\"$1\" is a directory."
+elif [[ -d "$INPUT_ARG" ]]; then
+  print_error "\"$INPUT_ARG\" is a directory."
 
 else
-  print_error "\"$1\": no such file."
+  print_error "\"$INPUT_ARG\": no such file."
 fi
+
+curl "${curl_opts[@]}"
