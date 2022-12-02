@@ -25,12 +25,12 @@ IFS=$'\n\t'
 
 if [[ -t 1 ]]; then
   # stdout is a TTY, enable colors
-  STYLE_COMMAND="\\e[0;97m"
-  STYLE_ARG="\\e[0;96m"
-  STYLE_ERROR="\\e[91m"
-  STYLE_BOLD="\\e[1m"
-  STYLE_NORMAL="\\e[22m"
-  STYLE_RESET="\\e[0m"
+  STYLE_COMMAND="\033[0;97m"
+  STYLE_ARG="\033[0;96m"
+  STYLE_ERROR="\033[91m"
+  STYLE_BOLD="\033[1m"
+  STYLE_NORMAL="\033[22m"
+  STYLE_RESET="\033[0m"
 else
   # stdout is not a TTY, disable colors
   STYLE_COMMAND=""
@@ -49,7 +49,7 @@ print_error() {
 
 print_help() {
   base="${0##*/}"
-	echo -e "${STYLE_BOLD}0x0, a wrapper script for https://0x0.st/${STYLE_RESET}\n"
+  echo -e "${STYLE_BOLD}0x0, a wrapper script for https://0x0.st/${STYLE_RESET}\n"
   echo -e "  Upload a file:"
   echo -e "      ${STYLE_COMMAND}${base} ${STYLE_ARG}<file>${STYLE_RESET}\n"
   echo -e "  Upload from an URL (the file won't be fetched locally):"
