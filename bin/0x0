@@ -27,6 +27,7 @@ API_ENDPOINT=https://0x0.st/
 EXPIRES=0
 INPUT_ARG=""
 MIMETYPE=""
+SECRET=false
 VERBOSE=false
 
 if [[ -t 1 ]]; then
@@ -63,6 +64,7 @@ print_help() {
   echo -e "                           a timestamp in epoch milliseconds."
   echo -e "  -m | --mimetype ${STYLE_ARG}<type>${STYLE_RESET}   Force a mime-type to the uploaded content"
   echo -e "                           example: -m text/plain"
+  echo -e "  -s | --secret            Use a longer, hard-to-guess URL"
   echo -e "  -v | --verbose           Also return relevant headers from response"
   echo -e "                           Outputs x-expires and x-token headers if present"
   echo -e "Examples:"
@@ -100,6 +102,9 @@ while [[ $# -gt 0 ]]; do
         print_error "Missing or invalid argument for mimetype option"
       fi
       MIMETYPE="$1"
+      ;;
+    "-s"|"--secret")
+      SECRET=true
       ;;
     "-v"|"--verbose")
       VERBOSE=true
@@ -148,6 +153,11 @@ elif [[ -d "$INPUT_ARG" ]]; then
 
 else
   print_error "\"$INPUT_ARG\": no such file."
+fi
+
+# Add, finally, add use secret if needed
+if [[ $SECRET == true ]]; then
+  curl_opts=( -F secret="" "${curl_opts[@]}" )
 fi
 
 curl "${curl_opts[@]}"
