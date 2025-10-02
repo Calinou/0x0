@@ -27,7 +27,7 @@ API_ENDPOINT=https://0x0.st/
 EXPIRES=0
 INPUT_ARG=""
 MIMETYPE=""
-SECRET=false
+SECRET=true
 VERBOSE=false
 
 if [[ -t 1 ]]; then
@@ -64,7 +64,7 @@ print_help() {
   echo -e "                           a timestamp in epoch milliseconds."
   echo -e "  -m | --mimetype ${STYLE_ARG}<type>${STYLE_RESET}   Force a mime-type to the uploaded content"
   echo -e "                           example: -m text/plain"
-  echo -e "  -s | --secret            Use a longer, hard-to-guess URL"
+  echo -e "  -n | --no-secret         Use a short, easy-to-guess URL"
   echo -e "  -v | --verbose           Also return relevant headers from response"
   echo -e "                           Outputs x-expires and x-token headers if present"
   echo -e "Examples:"
@@ -103,8 +103,8 @@ while [[ $# -gt 0 ]]; do
       fi
       MIMETYPE="$1"
       ;;
-    "-s"|"--secret")
-      SECRET=true
+    "-n"|"--no-secret")
+      SECRET=false
       ;;
     "-v"|"--verbose")
       VERBOSE=true
